@@ -20,13 +20,13 @@
 ;; OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 ;; OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 ;; SUCH DAMAGE.
-;; 
+;;
 ;; Usage:
-;; 
+;;
 ;; (add-to-list 'load-path "/the/path/to/bdo")
-;; 
+;;
 ;; Optional keybinding:
-;; 
+;;
 ;; (define-key css-mode-map (kbd "C-x C-s") 'css-refresh)
 ;; (defun css-refresh ()
 ;;   "Refresh the current CSS file."
@@ -34,7 +34,7 @@
 ;;   (when (buffer-modified-p)
 ;;     (save-buffer))
 ;;   (bdo-refresh))
-;; 
+;;
 
 (require 'cl)
 
@@ -52,6 +52,13 @@
   "The JS file to read (if cannot find absolute or relative to
 current buffer, tries to get from 'load-path."
   :type 'string
+  :group 'bdo)
+
+(defcustom bdo-reload-page-formats
+  '(".html" ".js" ".erb")
+  "File extensions of files that should do a full reload of the
+page."
+  :type 'list
   :group 'bdo)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -144,9 +151,11 @@ current buffer, tries to get from 'load-path."
 
 (defun bdo--filter (process data)
   "Callback for INCOMMING data on a connection."
+  (message "fdsa")
   (when (string-match "\\(GET\\|POST\\) /\\(.+\\) " data)
     (let ((cmd (match-string 2 data))
           (referer (bdo--get-header data "Referer")))
+      (message referer)
       (cond
        ((string= cmd "bdo")
         (bdo--reply-js process (bdo--get-js (bdo--get-header data "Host")))
@@ -161,6 +170,12 @@ current buffer, tries to get from 'load-path."
         (let ((client (bdo--find-client referer)))
           (bdo--update-links client data)
           (bdo--reply-plain process "Links updated.")))
+       ((string= cmd "reloadFormats")
+        (let ((client (bdo--find-client referer)))
+          (bdo--reply-plain process (concat (mapconcat 'identity
+						bdo-reload-page-formats
+						"$|") "$"))))
+
        (t (bdo--reply-plain process (format "Unknown command: %S" cmd)))))))
 
 (defun bdo--find-client (referer)
@@ -198,7 +213,7 @@ current buffer, tries to get from 'load-path."
 (defun bdo--get-js (host)
   "Get the JS code to send to the client."
   (if (bdo--find-js-file)
-      (with-temp-buffer 
+      (with-temp-buffer
         (insert-file-contents (bdo--find-js-file))
         (goto-char (point-max))
         (insert (format "bdo.host = %S;\n" (format "http://%s/" host))
@@ -224,7 +239,7 @@ current buffer, tries to get from 'load-path."
                                   data)
                     (match-string 1 data))))
     (if (not value)
-        (error "Unable to get header %s from client, request was: %S." %s data)
+        (error "Unable to get header %s from client, request was: %S." header data)
       value)))
 
 (defun bdo--update-links (client data)
@@ -243,3 +258,39 @@ current buffer, tries to get from 'load-path."
       (url-unhex-string (replace-regexp-in-string "+" "%20" post-data)))))
 
 (provide 'bdo)
+
+;;; refresh
+
+;; (defvar bdo-project-dir "/home/kidd/public_html/")
+;; ;; (defvar bdo-formats '(css-mode-map js-mode-map html-mode-map ))
+
+;; (define-key html-mode-map (kbd "C-x C-s") 'bdo-refresh)
+;; ;; (define-key css-mode-map (kbd "C-x C-s") 'scss-refresh)
+;; (define-key scss-mode-map (kbd "C-x C-s") 'bdo-refresh)
+
+;; (defun bdo-desired-subdir ()
+;;   (string-match bdo-project-dir (pwd))) ;difference with default-directory?
+
+;; (defun bdo-want-to-update ()
+;;   (if (boundp 'bdo-updateable)
+;;       bdo-updateable
+;;     (set (make-local-variable 'bdo-updateable) (yes-or-no-p "want to use bdo on this?"))))
+
+;; (defun bdo-refresh ()
+;;   "Refresh the current CSS file."
+;;   (interactive)
+;;   (when (buffer-modified-p)
+;;     (save-buffer))
+;;   (when (and (bdo-desired-subdir)
+;; 	     (bdo-want-to-update))
+;;     (bdo-refresh)))
+
+;; (defun scss-refresh ()
+;;   "Compile the current SCSS file and reload the CSS."
+;;   (interactive)
+;;   (when (buffer-modified-p)
+;;     (save-buffer))
+;;   (when (and (bdo-desired-subdir)
+;; 	     (bdo-want-to-update))
+;;     ;; (;compile)
+;;     (bdo-refresh)))

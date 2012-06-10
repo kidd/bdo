@@ -24,7 +24,15 @@ var bdo = {};
 bdo.init = function(){
   $(document).ready(function(){
     bdo.sendLinks();
+    bdo.reloadFormats();
     bdo.poll();
+  });
+};
+
+bdo.reloadFormats = function(){
+  $.get(bdo.host + 'reloadFormats',function(rFormats){
+    bdo.formats = rFormats;
+    bdo.log(rFormats);
   });
 };
 
@@ -38,6 +46,11 @@ bdo.sendLinks = function(){
       hrefs.push($(this).attr('href'));
     }
   });
+  // $('script[type="text/javascript"]').each(function(){
+  //   if($(this).attr('src') != '') {
+  //     hrefs.push($(this).attr('src'));
+  //   }
+  // });
   $.post(bdo.host + 'links',{links:bdo.sexp(hrefs)},function(response){
     bdo.log("Posted links: " + JSON.stringify(hrefs));
     bdo.log("Links reply: %s",response);
@@ -79,11 +92,29 @@ bdo.poll = function(){
  */
 bdo.refresh = function(href){
   bdo.log("Refreshing “%s”…",href);
+
+  if (new RegExp(bdo.formats).test(href)) {
+      window.location.reload();
+  }
   $('link').each(function(){
     if($(this).attr('href').indexOf(href) == 0) {
       // I don't know of any other way to “refresh” an element while
       // preserving ordering such that CSS demands.
       $(this).attr('href',href + "?reload=" + Math.random());
+    }
+  });
+  return;
+  $('script').each(function(){
+    if($(this).attr('src').indexOf(href) == 0) {
+      // I don't know of any other way to “refresh” an element while
+      // preserving ordering such that CSS demands.
+
+      // $(this).remove();
+      // var fileref=document.createElement('script');
+      // fileref.setAttribute("type","text/javascript");
+      // fileref.setAttribute("src", href+"?reload=" + Math.random());
+      // document.getElementsByTagName("head")[0].appendChild(fileref);
+      window.location.reload();
     }
   });
 };
