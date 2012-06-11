@@ -169,12 +169,6 @@ page."
         (let ((client (bdo--find-client referer)))
           (bdo--update-links client data)
           (bdo--reply-plain process "Links updated.")))
-       ((string= cmd "reloadFormats")
-        (let ((client (bdo--find-client referer)))
-          (bdo--reply-plain process (concat (mapconcat 'identity
-						bdo-reload-page-formats
-						"$|") "$"))))
-
        (t (bdo--reply-plain process (format "Unknown command: %S" cmd)))))))
 
 (defun bdo--find-client (referer)
