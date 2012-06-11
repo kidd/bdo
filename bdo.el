@@ -54,13 +54,6 @@ current buffer, tries to get from 'load-path."
   :type 'string
   :group 'bdo)
 
-(defcustom bdo-reload-page-formats
-  '(".html" ".js" ".erb")
-  "File extensions of files that should do a full reload of the
-page."
-  :type 'list
-  :group 'bdo)
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Types
 
