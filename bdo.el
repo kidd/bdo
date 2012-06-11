@@ -96,7 +96,8 @@ page."
   (interactive)
   (let* ((client (bdo-client))
          (process (bdo-client-process client))
-         (link (and process (bdo-link))))
+         (link (or href
+		   (and process (bdo-link)))))
     (when (and process link)
       (bdo--reply-plain (bdo-client-process client) link)
       (message "Refreshed."))))
@@ -151,11 +152,9 @@ page."
 
 (defun bdo--filter (process data)
   "Callback for INCOMMING data on a connection."
-  (message "fdsa")
   (when (string-match "\\(GET\\|POST\\) /\\(.+\\) " data)
     (let ((cmd (match-string 2 data))
           (referer (bdo--get-header data "Referer")))
-      (message referer)
       (cond
        ((string= cmd "bdo")
         (bdo--reply-js process (bdo--get-js (bdo--get-header data "Host")))
@@ -258,39 +257,3 @@ page."
       (url-unhex-string (replace-regexp-in-string "+" "%20" post-data)))))
 
 (provide 'bdo)
-
-;;; refresh
-
-;; (defvar bdo-project-dir "/home/kidd/public_html/")
-;; ;; (defvar bdo-formats '(css-mode-map js-mode-map html-mode-map ))
-
-;; (define-key html-mode-map (kbd "C-x C-s") 'bdo-refresh)
-;; ;; (define-key css-mode-map (kbd "C-x C-s") 'scss-refresh)
-;; (define-key scss-mode-map (kbd "C-x C-s") 'bdo-refresh)
-
-;; (defun bdo-desired-subdir ()
-;;   (string-match bdo-project-dir (pwd))) ;difference with default-directory?
-
-;; (defun bdo-want-to-update ()
-;;   (if (boundp 'bdo-updateable)
-;;       bdo-updateable
-;;     (set (make-local-variable 'bdo-updateable) (yes-or-no-p "want to use bdo on this?"))))
-
-;; (defun bdo-refresh ()
-;;   "Refresh the current CSS file."
-;;   (interactive)
-;;   (when (buffer-modified-p)
-;;     (save-buffer))
-;;   (when (and (bdo-desired-subdir)
-;; 	     (bdo-want-to-update))
-;;     (bdo-refresh)))
-
-;; (defun scss-refresh ()
-;;   "Compile the current SCSS file and reload the CSS."
-;;   (interactive)
-;;   (when (buffer-modified-p)
-;;     (save-buffer))
-;;   (when (and (bdo-desired-subdir)
-;; 	     (bdo-want-to-update))
-;;     ;; (;compile)
-;;     (bdo-refresh)))

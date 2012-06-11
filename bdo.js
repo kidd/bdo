@@ -92,29 +92,15 @@ bdo.poll = function(){
  */
 bdo.refresh = function(href){
   bdo.log("Refreshing “%s”…",href);
-
-  if (new RegExp(bdo.formats).test(href)) {
+  if (href == "bdo-reload") {
       window.location.reload();
+      return;
   }
   $('link').each(function(){
     if($(this).attr('href').indexOf(href) == 0) {
       // I don't know of any other way to “refresh” an element while
       // preserving ordering such that CSS demands.
       $(this).attr('href',href + "?reload=" + Math.random());
-    }
-  });
-  return;
-  $('script').each(function(){
-    if($(this).attr('src').indexOf(href) == 0) {
-      // I don't know of any other way to “refresh” an element while
-      // preserving ordering such that CSS demands.
-
-      // $(this).remove();
-      // var fileref=document.createElement('script');
-      // fileref.setAttribute("type","text/javascript");
-      // fileref.setAttribute("src", href+"?reload=" + Math.random());
-      // document.getElementsByTagName("head")[0].appendChild(fileref);
-      window.location.reload();
     }
   });
 };
