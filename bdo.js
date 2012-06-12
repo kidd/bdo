@@ -24,15 +24,7 @@ var bdo = {};
 bdo.init = function(){
   $(document).ready(function(){
     bdo.sendLinks();
-    bdo.reloadFormats();
     bdo.poll();
-  });
-};
-
-bdo.reloadFormats = function(){
-  $.get(bdo.host + 'reloadFormats',function(rFormats){
-    bdo.formats = rFormats;
-    bdo.log(rFormats);
   });
 };
 
