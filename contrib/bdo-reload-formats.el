@@ -20,10 +20,10 @@
       ((cdr reload-method)))))
 
 (defun bdo-update ()
-  (bdo-refresh))
+  (bdo-refresh "bdo-reload"))
 
 (defun bdo-live-reload ()
-  (bdo-refresh "bdo-reload"))
+  (bdo-refresh))
 
 (defun bdo-desired-subdir ()
   (string-match bdo-project-dir (pwd))) ;difference with default-directory?
